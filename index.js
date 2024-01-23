@@ -48,13 +48,27 @@ async function run() {
 
     // user collection
 
+
+  
+
     app.get('/users', async (req, res) => {
-      let query = {}
-      if (req.query?._id) {
-        query = { _id: new ObjectId(req.query._id) }
+      let query = {};
+    
+      if (req.query?.email) {
+        query = { email: req.query.email };
       }
-      const result = await userCollection.find(query).toArray();
-      // console.log(result)
+    
+      let result = await userCollection.find(query).toArray();
+      res.send(result);
+    });
+    
+
+
+
+    app.post('/users', async (req, res) => {
+      let userInfo = req.body
+      console.log(userInfo)
+      const result = await userCollection.insertOne(userInfo);
       res.send(result)
     })
 
