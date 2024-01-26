@@ -1,5 +1,6 @@
 const express = require('express')
 const cors = require('cors')
+const jwt = require('jsonwebtoken')
 const { MongoClient, ServerApiVersion } = require('mongodb');
 const app = express()
 const port = process.env.port || 5000
@@ -15,6 +16,22 @@ app.use(express.json())
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.dmnxhxd.mongodb.net/?retryWrites=true&w=majority`;
 
 
+const VerifyJWT = (req, res, next) => {
+  const authorization = req.header.authorization
+  if (!authorization) {
+    res.status(401).send({ error: true, message: "unauthorized access" })
+  }
+  console.log(authorization)
+  const token = authorization.split(' ')[1];
+  jwt.verify(token, process.env.Token, (err, decoded) => {
+    if (err) {
+      res.status(401).send({ error: true, message: "unauthorized access" })
+    }
+    req.decoded = decoded
+    next()
+  })
+
+}
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
@@ -34,8 +51,13 @@ async function run() {
     const doctorCollection = client.db('Easy-Med').collection('doctors')
     const userCollection = client.db('Easy-Med').collection('users')
 
+    //jwt
+    app.post("/jwt", (req, res) => {
+      const user = req.body;
+      const token = jwt.sign(user?.email, process.env.Token, { expiresIn: '1h' })
+      res.send({ token })
+    })
     //doctor collection
-
     app.get('/doctors', async (req, res) => {
       let query = {}
       if (req.query?._id) {
@@ -46,22 +68,28 @@ async function run() {
       res.send(result)
     })
 
+    const verifyAdmin = async (req, res, next) => {
+      const email = req.decoded.email
+      const query = { email: email }
+      const user = await userCollection.findOne(query)
+      if (user?.user_role !== 'admin') {
+        res.status(401).send({ message: 'unauthorized access' })
+      }
+      next()
+    }
     // user collection
-
-
-  
-
     app.get('/users', async (req, res) => {
       let query = {};
-    
+
       if (req.query?.email) {
         query = { email: req.query.email };
       }
-    
+
       let result = await userCollection.find(query).toArray();
       res.send(result);
     });
-    
+
+
 
 
 
