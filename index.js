@@ -16,22 +16,22 @@ app.use(express.json())
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.dmnxhxd.mongodb.net/?retryWrites=true&w=majority`;
 
 
-const VerifyJWT = (req, res, next) => {
-  const authorization = req.header.authorization
-  if (!authorization) {
-    res.status(401).send({ error: true, message: "unauthorized access" })
-  }
-  console.log(authorization)
-  const token = authorization.split(' ')[1];
-  jwt.verify(token, process.env.Token, (err, decoded) => {
-    if (err) {
-      res.status(401).send({ error: true, message: "unauthorized access" })
-    }
-    req.decoded = decoded
-    next()
-  })
+// const VerifyJWT = (req, res, next) => {
+//   const authorization = req.header.authorization
+//   if (!authorization) {
+//     res.status(401).send({ error: true, message: "unauthorized access" })
+//   }
+//   console.log(authorization)
+//   const token = authorization.split(' ')[1];
+//   jwt.verify(token, process.env.Token, (err, decoded) => {
+//     if (err) {
+//       res.status(401).send({ error: true, message: "unauthorized access" })
+//     }
+//     req.decoded = decoded
+//     next()
+//   })
 
-}
+// }
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
@@ -52,11 +52,12 @@ async function run() {
     const userCollection = client.db('Easy-Med').collection('users')
 
     //jwt
-    app.post("/jwt", (req, res) => {
-      const user = req.body;
-      const token = jwt.sign(user?.email, process.env.Token, { expiresIn: '1h' })
-      res.send({ token })
-    })
+    // app.post("/jwt", (req, res) => {
+    //   const user = req.body;
+    //   const token = jwt.sign(user?.email, process.env.Token, { expiresIn: '2h' })
+    //   res.send({ token })
+    // })
+
     //doctor collection
     app.get('/doctors', async (req, res) => {
       let query = {}
@@ -67,16 +68,22 @@ async function run() {
       // console.log(result)
       res.send(result)
     })
-
-    const verifyAdmin = async (req, res, next) => {
-      const email = req.decoded.email
-      const query = { email: email }
-      const user = await userCollection.findOne(query)
-      if (user?.user_role !== 'admin') {
-        res.status(401).send({ message: 'unauthorized access' })
-      }
-      next()
-    }
+    app.get('/doctors/:speciality', async (req, res) => {
+      let params = req.params.speciality
+      query = { speciality: params }
+      const doctor = await doctorCollection.find(query).toArray()
+      res.send(doctor)
+    })
+    //admin middleware
+    // const verifyAdmin = async (req, res, next) => {
+    //   const email = req.decoded.email
+    //   const query = { email: email }
+    //   const user = await userCollection.findOne(query)
+    //   if (user?.user_role !== 'admin') {
+    //     res.status(401).send({ message: 'unauthorized access' })
+    //   }
+    //   next()
+    // }
     // user collection
     app.get('/users', async (req, res) => {
       let query = {};
