@@ -1,6 +1,6 @@
 const express = require('express')
 const cors = require('cors')
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const app = express()
 const port = process.env.port || 5000
 
@@ -46,24 +46,26 @@ async function run() {
       res.send(result)
     })
 
+    app.delete('/doctors', async (req, res) => {
+      let { _id } = req.query
+      let filter = { _id: new ObjectId(_id) };
+      const result = await doctorCollection.deleteOne(filter)
+      console.log(result)
+      res.send(result);
+    })
+
     // user collection
-
-
-  
 
     app.get('/users', async (req, res) => {
       let query = {};
-    
+
       if (req.query?.email) {
         query = { email: req.query.email };
       }
-    
+
       let result = await userCollection.find(query).toArray();
       res.send(result);
     });
-    
-
-
 
     app.post('/users', async (req, res) => {
       let userInfo = req.body
@@ -72,7 +74,26 @@ async function run() {
       res.send(result)
     })
 
+    app.patch('/users', async (req, res) => {
+      const { email } = req.query
+      const updatedData = req.body
+      let filter = {}
+      if (email) {
+        filter = { email }
+      } else {
+        console.log('email not found')
+      }
+      const result = await userCollection.updateOne(filter, { $set: updatedData })
+      res.send(result)
+    })
 
+    app.delete('/users', async (req, res) => {
+      let { email } = req.query
+      console.log({ email })
+      let filter = { email }
+      const result = await userCollection.deleteOne(filter)
+      res.send(result);
+    })
 
 
 
