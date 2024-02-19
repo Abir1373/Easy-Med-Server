@@ -1,6 +1,6 @@
 const express = require('express')
 const cors = require('cors')
-const { MongoClient, ServerApiVersion } = require('mongodb');
+
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const app = express()
 const port = process.env.port || 5000
@@ -50,6 +50,7 @@ async function run() {
 
     const doctorCollection = client.db('Easy-Med').collection('doctors')
     const userCollection = client.db('Easy-Med').collection('users')
+    const doctor_request_Collection = client.db('Easy-Med').collection('doctor_request')
 
     //jwt
     // app.post("/jwt", (req, res) => {
@@ -74,6 +75,7 @@ async function run() {
       const doctor = await doctorCollection.find(query).toArray()
       res.send(doctor)
     })
+
     //admin middleware
     // const verifyAdmin = async (req, res, next) => {
     //   const email = req.decoded.email
@@ -84,8 +86,7 @@ async function run() {
     //   }
     //   next()
     // }
-    // user collection
-=======
+
 
     app.delete('/doctors', async (req, res) => {
       let { _id } = req.query
@@ -93,6 +94,13 @@ async function run() {
       const result = await doctorCollection.deleteOne(filter)
       console.log(result)
       res.send(result);
+    })
+
+    app.post('/doctors', async (req, res) => {
+      let doctorInfo = req.body
+      console.log(doctorInfo)
+      const result = await doctorCollection.insertOne(doctorInfo);
+      res.send(result)
     })
 
     // user collection
@@ -137,8 +145,31 @@ async function run() {
     })
 
 
+    //doctor_request collection 
 
+    app.post('/doctor_request', async (req, res) => {
+      let DoctorInfo = req.body
+      console.log(DoctorInfo)
+      const result = await doctor_request_Collection.insertOne(DoctorInfo)
+      res.send(result)
+    })
 
+    app.get('/doctor_request', async (req, res) => {
+      let query = {};
+      if (req.query?.email) {
+        query = { email: req.query.email };
+      }
+      let result = await doctor_request_Collection.find(query).toArray();
+      res.send(result);
+    });
+
+    app.delete('/doctor_request', async (req, res) => {
+      let { _id } = req.query
+      let filter = { _id: new ObjectId(_id) };
+      const result = await doctor_request_Collection.deleteOne(filter)
+      console.log(result)
+      res.send(result);
+    })
 
 
     await client.db("admin").command({ ping: 1 });
