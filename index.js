@@ -51,6 +51,7 @@ async function run() {
     const doctorCollection = client.db('Easy-Med').collection('doctors')
     const userCollection = client.db('Easy-Med').collection('users')
     const doctor_request_Collection = client.db('Easy-Med').collection('doctor_request')
+    const doctor_appointment = client.db('Easy-Med').collection('appointment')
 
     //jwt
     // app.post("/jwt", (req, res) => {
@@ -164,6 +165,11 @@ async function run() {
       res.send(result);
     })
 
+    app.post('/doctor-appointment', async (req, res) => {
+      const data = req?.body;
+      const result = await doctor_appointment.insertOne(data)
+      res.send(result)
+    })
 
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
