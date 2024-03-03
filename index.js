@@ -51,6 +51,9 @@ async function run() {
     const doctorCollection = client.db('Easy-Med').collection('doctors')
     const userCollection = client.db('Easy-Med').collection('users')
     const doctor_request_Collection = client.db('Easy-Med').collection('doctor_request')
+    const doctor_appointment = client.db('Easy-Med').collection('appointment')
+    const patientAppointment = client.db('Easy-Med').collection('patient_appointment')
+    
 
     //jwt
     // app.post("/jwt", (req, res) => {
@@ -60,6 +63,17 @@ async function run() {
     // })
 
     //doctor collection
+
+    // app.get('/doctors', async (req, res) => {
+    //   let query = {};
+
+    //   if (req.query?.email) {
+    //     query = { email: req.query.email };
+    //   }
+    //   let result = await doctorCollection.find(query).toArray();
+    //   res.send(result);
+    // });
+
     app.get('/doctors', async (req, res) => {
       let query = {}
       if (req.query?._id) {
@@ -69,11 +83,33 @@ async function run() {
       // console.log(result)
       res.send(result)
     })
+
+    app.get('/doctors/:email', async (req, res) => {
+      let params = req.params.email
+      query = { email: params }
+      const doctor = await doctorCollection.find(query).toArray()
+      res.send(doctor)
+    })
+
     app.get('/doctors/:speciality', async (req, res) => {
       let params = req.params.speciality
       query = { speciality: params }
       const doctor = await doctorCollection.find(query).toArray()
       res.send(doctor)
+    })
+
+    app.patch('/doctors', async (req, res) => {
+      const { email } = req.query
+      const updatedData = req.body
+      let filter = {}
+      if (email) {
+        filter = { email }
+      } else {
+        console.log('email not found')
+      }
+      const result = await doctorCollection.updateOne(filter, { $set: updatedData })
+      // console.log(result)
+      res.send(result)
     })
 
     //admin middleware
@@ -94,13 +130,6 @@ async function run() {
       const result = await doctorCollection.deleteOne(filter)
       console.log(result)
       res.send(result);
-    })
-
-    app.post('/doctors', async (req, res) => {
-      let doctorInfo = req.body
-      console.log(doctorInfo)
-      const result = await doctorCollection.insertOne(doctorInfo);
-      res.send(result)
     })
 
     // user collection
@@ -129,6 +158,7 @@ async function run() {
       let filter = {}
       if (email) {
         filter = { email }
+        console.log(filter)
       } else {
         console.log('email not found')
       }
@@ -149,7 +179,7 @@ async function run() {
 
     app.post('/doctor_request', async (req, res) => {
       let DoctorInfo = req.body
-      console.log(DoctorInfo)
+      // console.log(DoctorInfo)
       const result = await doctor_request_Collection.insertOne(DoctorInfo)
       res.send(result)
     })
@@ -167,8 +197,41 @@ async function run() {
       let { _id } = req.query
       let filter = { _id: new ObjectId(_id) };
       const result = await doctor_request_Collection.deleteOne(filter)
-      console.log(result)
+      // console.log(result)
       res.send(result);
+    })
+
+    app.post('/doctor-appointment', async (req, res) => {
+      const data = req?.body;
+      const result = await doctor_appointment.insertOne(data)
+      res.send(result)
+    })
+
+
+
+    //patient_collection
+
+
+    app.get('/patient_appointment', async (req, res) => {
+      let query = {}
+      if (req.query?.email && req.query.appointment_date) {
+        query = { doctor_email: req.query.email, appointment_date: req.query.appointment_date }
+      }
+      // console.log(query)
+      let result = await patientAppointment.find(query).toArray()
+      // console.log(result)
+      res.send(result)
+    })
+
+    
+
+    
+
+    app.post('/patient_appointment', async (req, res) => {
+      let data = req?.body ; 
+      // console.log(data)
+      const result = await patientAppointment.insertOne(data)
+      res.send(result)
     })
 
 
