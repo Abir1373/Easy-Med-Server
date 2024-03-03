@@ -53,7 +53,7 @@ async function run() {
     const doctor_request_Collection = client.db('Easy-Med').collection('doctor_request')
     const doctor_appointment = client.db('Easy-Med').collection('appointment')
     const patientAppointment = client.db('Easy-Med').collection('patient_appointment')
-    
+
 
     //jwt
     // app.post("/jwt", (req, res) => {
@@ -91,8 +91,8 @@ async function run() {
       res.send(doctor)
     })
 
-    app.get('/doctors/:speciality', async (req, res) => {
-      let params = req.params.speciality
+    app.get('/speciality', async (req, res) => {
+      let params = req.query.speciality
       query = { speciality: params }
       const doctor = await doctorCollection.find(query).toArray()
       res.send(doctor)
@@ -223,12 +223,12 @@ async function run() {
       res.send(result)
     })
 
-    
 
-    
+
+
 
     app.post('/patient_appointment', async (req, res) => {
-      let data = req?.body ; 
+      let data = req?.body;
       // console.log(data)
       const result = await patientAppointment.insertOne(data)
       res.send(result)
