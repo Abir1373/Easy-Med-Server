@@ -53,6 +53,7 @@ async function run() {
     const doctor_request_Collection = client.db('Easy-Med').collection('doctor_request')
     const doctor_appointment = client.db('Easy-Med').collection('appointment')
     const patientAppointment = client.db('Easy-Med').collection('patient_appointment')
+    const prescription_collection = client.db('Easy-Med').collection('prescrioption_collection')
 
 
     //jwt
@@ -211,6 +212,12 @@ async function run() {
 
     //patient_collection
 
+    app.post('/patient_appointment', async (req, res) => {
+      let data = req?.body;
+      // console.log(data)
+      const result = await patientAppointment.insertOne(data)
+      res.send(result)
+    })
 
     app.get('/patient_appointment', async (req, res) => {
       let query = {}
@@ -223,6 +230,32 @@ async function run() {
       res.send(result)
     })
 
+    app.get('/patient_appointment_user', async (req, res) => {
+      let query = {}
+      if (req.query?.email && req.query.appointment_date) {
+        query = { user_email: req.query.email, appointment_date: req.query.appointment_date }
+      }
+      // console.log(query)
+      let result = await patientAppointment.find(query).toArray()
+      // console.log(result)
+      res.send(result)
+    })
+    app.get('/patient_history', async (req, res) => {
+      let query = {}
+      if (req.query?.email && req.query.appointment_date) {
+        query = { user_email: req.query.email, appointment_date: req.query.appointment_date }
+      }
+      // console.log(query)
+      let result = await patientAppointment.find(query).toArray()
+      // console.log(result)
+      res.send(result)
+    })
+    app.post("/prescription_collection", async (req, res) => {
+      const data = req.body
+      const result = await prescription_collection.insertOne(data)
+      res.send(result)
+      })
+
     
 
 
@@ -233,10 +266,9 @@ async function run() {
       let data = req?.body;
       // console.log(data)
       const result = await patientAppointment.insertOne(data)
+
       res.send(result)
     })
-
-
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
