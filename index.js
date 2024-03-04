@@ -217,11 +217,13 @@ async function run() {
       if (req.query?.email && req.query.appointment_date) {
         query = { doctor_email: req.query.email, appointment_date: req.query.appointment_date }
       }
-      // console.log(query)
+      console.log(query)
       let result = await patientAppointment.find(query).toArray()
       // console.log(result)
       res.send(result)
     })
+
+    
 
 
 
