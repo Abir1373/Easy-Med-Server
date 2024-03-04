@@ -224,11 +224,12 @@ async function run() {
       if (req.query?.email && req.query.appointment_date) {
         query = { doctor_email: req.query.email, appointment_date: req.query.appointment_date }
       }
-      // console.log(query)
+      console.log(query)
       let result = await patientAppointment.find(query).toArray()
       // console.log(result)
       res.send(result)
     })
+
     app.get('/patient_appointment_user', async (req, res) => {
       let query = {}
       if (req.query?.email && req.query.appointment_date) {
@@ -252,6 +253,20 @@ async function run() {
     app.post("/prescription_collection", async (req, res) => {
       const data = req.body
       const result = await prescription_collection.insertOne(data)
+      res.send(result)
+      })
+
+    
+
+
+
+
+
+    app.post('/patient_appointment', async (req, res) => {
+      let data = req?.body;
+      // console.log(data)
+      const result = await patientAppointment.insertOne(data)
+
       res.send(result)
     })
     await client.db("admin").command({ ping: 1 });
